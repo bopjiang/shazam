@@ -17,6 +17,7 @@ package plan
 import (
 	"fmt"
 
+	"github.com/nooncall/shazam/log"
 	"github.com/nooncall/shazam/parser/ast"
 	"github.com/nooncall/shazam/parser/format"
 	"github.com/nooncall/shazam/proxy/router"
@@ -112,6 +113,7 @@ func (t *TableNameDecorator) Restore(ctx *format.RestoreCtx) error {
 	} else if router.IsMycatShardingRule(ruleType) {
 		ctx.WriteName(t.origin.Name.String())
 	} else {
+		log.Debug("++++ write table name, table_name=%s, %+v", t.origin.Name.String(), t.origin.TableInfo)
 		ctx.WriteName(fmt.Sprintf("%s_%04d", t.origin.Name.String(), tableIndex))
 	}
 

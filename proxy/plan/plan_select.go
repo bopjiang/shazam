@@ -17,6 +17,7 @@ package plan
 import (
 	"fmt"
 
+	"github.com/nooncall/shazam/log"
 	"github.com/nooncall/shazam/mysql"
 	"github.com/nooncall/shazam/parser/ast"
 	"github.com/nooncall/shazam/parser/opcode"
@@ -213,6 +214,7 @@ func HandleSelectStmt(p *SelectPlan, stmt *ast.SelectStmt) error {
 	}
 
 	p.sqls = sqls
+	log.Debug("++++ HandleSelectStmt, p.sqls=%s", sqls)
 
 	return nil
 }

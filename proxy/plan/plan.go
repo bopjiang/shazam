@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/nooncall/shazam/log"
 	"github.com/nooncall/shazam/mysql"
 	"github.com/nooncall/shazam/parser"
 	"github.com/nooncall/shazam/parser/ast"
@@ -514,6 +515,7 @@ func generateShardingSQLs(stmt ast.StmtNode, result *RouteResult, router *router
 		}
 
 		ret[sliceName][dbName] = append(ret[sliceName][dbName], sb.String())
+		log.Debug("generate sql: sliceName=%s, dbName=%s, sql=%s", sliceName, dbName, sb.String())
 	}
 
 	result.Reset() // must reset the cursor for next call

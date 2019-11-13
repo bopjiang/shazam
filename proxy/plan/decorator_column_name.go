@@ -144,6 +144,9 @@ func (c *ColumnNameDecorator) Restore(ctx *format.RestoreCtx) error {
 			log.Debug("++++ write table name in field=%s, table_name=%s", c.origin.Name.O, c.origin.Table.String())
 			ctx.WriteName(fmt.Sprintf("%s_%04d", c.origin.Table.String(), tableIndex))
 			ctx.WritePlain(".")
+		} else {
+			ctx.WriteName(c.origin.Table.String())
+			ctx.WritePlain(".")
 		}
 	}
 

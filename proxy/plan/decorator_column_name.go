@@ -31,9 +31,10 @@ type ColumnNameExprDecorator struct {
 
 // ColumnNameDecorator decorate ColumnName to rewrite table name
 type ColumnNameDecorator struct {
-	origin *ast.ColumnName
-	rule   router.Rule
-	result *RouteResult
+	origin             *ast.ColumnName
+	rule               router.Rule
+	result             *RouteResult
+	isAliasTableColumn bool
 }
 
 // NeedCreateColumnNameExprDecoratorInField check if ColumnNameExpr in field needs decoration
@@ -71,20 +72,26 @@ func needCreateColumnNameDecorator(p *TableAliasStmtInfo, n *ast.ColumnName) (ro
 	return rule, true, nil
 }
 
-// CreateColumnNameExprDecorator create ColumnNameExprDecorator
-func CreateColumnNameExprDecorator(n *ast.ColumnNameExpr, rule router.Rule, result *RouteResult) *ColumnNameExprDecorator {
-	columnName := createColumnNameDecorator(n.Name, rule, result)
+// CreateColumnNameExprDecorator2 create ColumnNameExprDecorator
+func CreateColumnNameExprDecorator2(n *ast.ColumnNameExpr, rule router.Rule, result *RouteResult, isAliasTableColumn bool) *ColumnNameExprDecorator {
+	columnName := createColumnNameDecorator(n.Name, rule, result, isAliasTableColumn)
 	return &ColumnNameExprDecorator{
 		ColumnNameExpr: n,
 		Name:           columnName,
 	}
 }
 
-func createColumnNameDecorator(n *ast.ColumnName, rule router.Rule, result *RouteResult) *ColumnNameDecorator {
+// CreateColumnNameExprDecorator create ColumnNameExprDecorator
+func CreateColumnNameExprDecorator(n *ast.ColumnNameExpr, rule router.Rule, result *RouteResult) *ColumnNameExprDecorator {
+	return CreateColumnNameExprDecorator2(n, rule, result, false)
+}
+
+func createColumnNameDecorator(n *ast.ColumnName, rule router.Rule, result *RouteResult, isAliasTableColumn bool) *ColumnNameDecorator {
 	ret := &ColumnNameDecorator{
-		origin: n,
-		rule:   rule,
-		result: result,
+		origin:             n,
+		rule:               rule,
+		result:             result,
+		isAliasTableColumn: isAliasTableColumn,
 	}
 	return ret
 }
@@ -133,7 +140,7 @@ func (c *ColumnNameDecorator) Restore(ctx *format.RestoreCtx) error {
 		} else if router.IsMycatShardingRule(ruleType) {
 			ctx.WriteName(c.origin.Table.String())
 			ctx.WritePlain(".")
-		} else {
+		} else if !c.isAliasTableColumn {
 			log.Debug("++++ write table name in field=%s, table_name=%s", c.origin.Name.O, c.origin.Table.String())
 			ctx.WriteName(fmt.Sprintf("%s_%04d", c.origin.Table.String(), tableIndex))
 			ctx.WritePlain(".")

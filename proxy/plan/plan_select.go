@@ -294,8 +294,14 @@ func createSelectFieldFromByItem(p *SelectPlan, item *ast.ByItem) (*ast.SelectFi
 		return nil, err
 	}
 
+	isAliasTableColumn := false
+	if _, ok := p.getAliasTable(columnExpr.Name.Table.O); ok {
+		isAliasTableColumn = true
+	}
+
+	log.Debug("+++ table_name=%s, column_name=%s, isAliasTableColumn=%v", columnExpr.Name.Table.O, columnExpr.Name.Name.O, isAliasTableColumn)
 	if need {
-		decorator := CreateColumnNameExprDecorator(columnExpr, rule, p.GetRouteResult())
+		decorator := CreateColumnNameExprDecorator2(columnExpr, rule, p.GetRouteResult(), isAliasTableColumn)
 		item.Expr = decorator
 	}
 
@@ -510,8 +516,16 @@ func (s *ColumnNameRewriteVisitor) Leave(n ast.Node) (node ast.Node, ok bool) {
 	if err != nil {
 		panic(fmt.Errorf("check NeedCreateColumnNameExprDecoratorInField in ColumnNameExpr error: %v", err))
 	}
+
+	isAliasTableColumn := false
+	if _, ok := s.info.getAliasTable(field.Name.Table.O); ok {
+		isAliasTableColumn = true
+	}
+
+	log.Debug("+++ table_name=%s, column_name=%s, isAliasTableColumn=%v", field.Name.Table.O, field.Name.Name.O, isAliasTableColumn)
+
 	if need {
-		decorator := CreateColumnNameExprDecorator(field, rule, s.info.GetRouteResult())
+		decorator := CreateColumnNameExprDecorator2(field, rule, s.info.GetRouteResult(), isAliasTableColumn)
 		return decorator, true
 	}
 

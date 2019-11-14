@@ -2805,6 +2805,38 @@ func TestSelectMultiTablesOnConditionKingshard(t *testing.T) {
 	}
 }
 
+func TestSelectAliasTableKingshard(t *testing.T) {
+	ns, err := preparePlanInfo()
+	if err != nil {
+		t.Fatalf("prepare namespace error: %v", err)
+	}
+
+	tests := []SQLTestcase{
+		{
+			db:  "db_ks",
+			sql: "select T.id from tbl_ks as T",
+			sqls: map[string]map[string][]string{
+				"slice-0": {
+					"db_ks": {
+						"SELECT `T`.`id` FROM `tbl_ks_0000` AS `T`",
+						"SELECT `T`.`id` FROM `tbl_ks_0001` AS `T`",
+					},
+				},
+				"slice-1": {
+					"db_ks": {
+						"SELECT `T`.`id` FROM `tbl_ks_0002` AS `T`",
+						"SELECT `T`.`id` FROM `tbl_ks_0003` AS `T`",
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.sql, getTestFunc(ns, test))
+	}
+}
+
 func TestSelectMultiTablesComparisonKingshard(t *testing.T) {
 	ns, err := preparePlanInfo()
 	if err != nil {

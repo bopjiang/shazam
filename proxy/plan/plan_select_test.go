@@ -2830,6 +2830,24 @@ func TestSelectAliasTableKingshard(t *testing.T) {
 				},
 			},
 		},
+		{
+			db:  "db_ks",
+			sql: "select T.id from tbl_ks as T where T.a = 1",
+			sqls: map[string]map[string][]string{
+				"slice-0": {
+					"db_ks": {
+						"SELECT `T`.`id` FROM `tbl_ks_0000` AS `T` WHERE `T`.`a` = 1",
+						"SELECT `T`.`id` FROM `tbl_ks_0001` AS `T` WHERE `T`.`a` = 1",
+					},
+				},
+				"slice-1": {
+					"db_ks": {
+						"SELECT `T`.`id` FROM `tbl_ks_0002` AS `T` WHERE `T`.`a` = 1",
+						"SELECT `T`.`id` FROM `tbl_ks_0003` AS `T` WHERE `T`.`a` = 1",
+					},
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {
